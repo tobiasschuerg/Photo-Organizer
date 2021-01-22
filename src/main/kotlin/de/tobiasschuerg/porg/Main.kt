@@ -9,23 +9,17 @@ import java.time.format.DateTimeFormatter
 class Main {
 
     companion object {
-        val move = true
 
         @JvmStatic
         fun main(args: Array<String>) {
-            args.forEach {
-                println("Args: $it")
-            }
+            val options = OptionHelper.help(args)
+            println("Source folder: ${options.src}")
+            println("Target folder: ${options.target}")
+            println("Move: ${options.move}")
+            println("========== continue? ========")
+            readLine()
 
-            val inputPath = args.first()
-            val inputDirectory = File(inputPath)
-            println("input dir: $inputPath")
-
-            val outputPath = args[1]
-            val outputDirectoy = File(outputPath)
-            println("output dir: $inputPath")
-
-            val listAllFilesRecursively = inputDirectory.listAllFilesRecursively()
+            val listAllFilesRecursively = options.src.listAllFilesRecursively()
             listAllFilesRecursively
                 .forEachIndexed { index, file ->
                     // print("$index $file")
@@ -39,9 +33,9 @@ class Main {
                         val day = date.format(DateTimeFormatter.ofPattern("dd"))
 
                         val filename = file.name
-                        val targetFile = File(outputDirectoy, "$year/$year-$month-$day/$filename")
+                        val targetFile = File(options.target, "$year/$year-$month-$day/$filename")
 
-                        if (move) {
+                        if (options.move) {
                             val filepath1 = Paths.get(file.toURI())
                             val targetpath1 = Paths.get(targetFile.toURI())
                             Files.createDirectories(targetpath1.parent)
@@ -50,7 +44,7 @@ class Main {
                             file.copyTo(targetFile, true)
                         }
                     } else {
-//                        println(" !!! Skipped $file")
+                        println(" !!! Skipped $file, could not determine date")
                     }
                 }
         }

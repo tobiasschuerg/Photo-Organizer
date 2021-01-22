@@ -1,7 +1,9 @@
 package de.tobiasschuerg.porg
 
 import com.drew.imaging.ImageMetadataReader
+import com.drew.imaging.quicktime.QuickTimeMetadataReader
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import com.drew.metadata.mov.media.QuickTimeVideoDirectory
 import com.drew.metadata.mp4.Mp4Directory
 import java.io.File
 import java.time.LocalDate
@@ -15,7 +17,7 @@ fun File.listAllFilesRecursively(): List<File> {
 }
 
 fun File.getDate(): LocalDate? {
-    return when (extension) {
+    return when (extension.toLowerCase()) {
         "json" -> {
             println("Delete json file $this")
             this.delete()
@@ -34,6 +36,11 @@ fun File.getDate(): LocalDate? {
         "mp4" -> {
             val metaData = ImageMetadataReader.readMetadata(this)
             getMp4Date(metaData.getFirstDirectoryOfType(Mp4Directory::class.java))
+        }
+        "mov" -> {
+            val metaData = QuickTimeMetadataReader.readMetadata(this)
+            val directory = metaData.getFirstDirectoryOfType(QuickTimeVideoDirectory::class.java)
+            directory.getDate(QuickTimeVideoDirectory.TAG_CREATION_TIME)?.toLocalDate()
         }
         else -> {
             println("Unknown extension ${this.extension}")
