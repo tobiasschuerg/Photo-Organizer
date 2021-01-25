@@ -1,6 +1,7 @@
 package de.tobiasschuerg.porg
 
 import java.io.File
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
@@ -39,7 +40,16 @@ class Main {
                             val filepath1 = Paths.get(file.toURI())
                             val targetpath1 = Paths.get(targetFile.toURI())
                             Files.createDirectories(targetpath1.parent)
-                            Files.move(filepath1, targetpath1)
+                            try {
+                                Files.move(filepath1, targetpath1)
+                            } catch (e: FileAlreadyExistsException) {
+                                if (filepath1.toFile().length() == targetpath1.toFile().length()) {
+                                    print("Duplicated same file, deleting... $filepath1")
+                                    filepath1.toFile().delete()
+                                } else {
+                                    // skip
+                                }
+                            }
                         } else {
                             file.copyTo(targetFile, true)
                         }
@@ -47,6 +57,13 @@ class Main {
                         println(" !!! Skipped $file, could not determine date")
                     }
                 }
+
+            options.src.listAllDirectoriesRecursively().forEach {
+                if (it.listFiles().isEmpty()) {
+                    println("Delete empty directory: $it")
+                    it.delete()
+                }
+            }
         }
     }
 }
