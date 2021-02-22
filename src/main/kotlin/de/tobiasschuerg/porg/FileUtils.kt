@@ -1,6 +1,7 @@
 package de.tobiasschuerg.porg
 
 import com.drew.imaging.ImageMetadataReader
+import com.drew.imaging.ImageProcessingException
 import com.drew.imaging.quicktime.QuickTimeMetadataReader
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.drew.metadata.mov.media.QuickTimeVideoDirectory
@@ -51,8 +52,14 @@ fun File.getDate(): LocalDate? {
             }
         }
         "mp4" -> {
-            val metaData = ImageMetadataReader.readMetadata(this)
-            getMp4Date(metaData.getFirstDirectoryOfType(Mp4Directory::class.java))
+            try {
+                val metaData = ImageMetadataReader.readMetadata(this)
+                getMp4Date(metaData.getFirstDirectoryOfType(Mp4Directory::class.java))
+            } catch (e:ImageProcessingException) {
+                println("Error processing ${this.name}")
+                e.printStackTrace()
+                null
+            }
         }
         "mov" -> {
             val metaData = QuickTimeMetadataReader.readMetadata(this)
