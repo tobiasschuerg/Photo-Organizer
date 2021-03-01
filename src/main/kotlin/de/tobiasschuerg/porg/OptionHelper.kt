@@ -1,7 +1,6 @@
 package de.tobiasschuerg.porg
 
 import java.io.File
-import kotlin.system.exitProcess
 
 object OptionHelper {
     fun help(args: Array<String>): Options {
@@ -19,7 +18,7 @@ object OptionHelper {
         } else {
             println("Directory exists")
             val srcFiles = inputDirectory.listAllFilesRecursively()
-            val directory = srcFiles.filter { it.isDirectory }.count()
+            val directory = inputDirectory.listAllDirectoriesRecursively().count()
             val files = srcFiles.filter { it.isFile }.count()
             println("Source directory $inputDirectory contains $files files in $directory directories")
         }
@@ -32,7 +31,7 @@ object OptionHelper {
             val path = readLine()
             File(path)
         }
-        println("output dir: $outputPath")
+        println("output dir: $outputDirectoy")
         if (!outputDirectoy.exists()) {
             println("Does not exist an will be created")
             print("Press return to confirm")

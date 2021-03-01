@@ -55,7 +55,7 @@ fun File.getDate(): LocalDate? {
             try {
                 val metaData = ImageMetadataReader.readMetadata(this)
                 getMp4Date(metaData.getFirstDirectoryOfType(Mp4Directory::class.java))
-            } catch (e:ImageProcessingException) {
+            } catch (e: ImageProcessingException) {
                 println("Error processing ${this.name}")
                 e.printStackTrace()
                 null
