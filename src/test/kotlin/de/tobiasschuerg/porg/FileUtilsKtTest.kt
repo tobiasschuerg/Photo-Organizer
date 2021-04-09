@@ -18,7 +18,7 @@ internal class FileUtilsKtTest {
     fun `test IMG- date`(){
         val file = File("foo/IMG-20180801-WA0006-bearbeitet.jpg")
         val date = file.parseDateFromFilename()
-        assertEquals(LocalDate.of(2015, 4, 10), date)
+        assertEquals(LocalDate.of(2018, 8, 1), date)
     }
 
 
