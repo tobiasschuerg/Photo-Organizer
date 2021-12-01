@@ -1,5 +1,8 @@
 package de.tobiasschuerg.porg
 
+import com.diogonunes.jcolor.Ansi.colorize
+import com.diogonunes.jcolor.Attribute.BLUE_TEXT
+import com.diogonunes.jcolor.Attribute.MAGENTA_TEXT
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
@@ -17,7 +20,7 @@ class Main {
             println("Source folder: ${options.src}")
             println("Target folder: ${options.target}")
             println("Move: ${options.move}")
-            println("========== continue? ========")
+            println(colorize("========== continue? ========", BLUE_TEXT()))
             readLine()
 
             val listAllFilesRecursively = options.src.listAllFilesRecursively()
@@ -60,7 +63,7 @@ class Main {
 
             options.src.listAllDirectoriesRecursively().forEach {
                 if (it.listFiles().isEmpty()) {
-                    println("Delete empty directory: $it")
+                    println(colorize("Delete empty directory: $it", MAGENTA_TEXT()))
                     it.delete()
                 }
             }
