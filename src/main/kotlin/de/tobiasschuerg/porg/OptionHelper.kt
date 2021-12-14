@@ -1,5 +1,7 @@
 package de.tobiasschuerg.porg
 
+import com.diogonunes.jcolor.Ansi
+import com.diogonunes.jcolor.Attribute
 import java.io.File
 
 object OptionHelper {
@@ -9,7 +11,7 @@ object OptionHelper {
         val inputDirectory = if (inputPath != null) {
             File(inputPath)
         } else {
-            println("Please enter the source directory:")
+            printPrompt("Please enter the source directory:")
             val path = readLine()
             File(path)
         }
@@ -19,7 +21,7 @@ object OptionHelper {
             println("Directory exists")
             val srcFiles = inputDirectory.listAllFilesRecursively()
             val directory = inputDirectory.listAllDirectoriesRecursively().count()
-            val files = srcFiles.filter { it.isFile }.count()
+            val files = srcFiles.count { it.isFile }
             println("Source directory $inputDirectory contains $files files in $directory directories")
         }
 

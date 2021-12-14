@@ -17,6 +17,7 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val options = OptionHelper.help(args)
+
             println("Source folder: ${options.src}")
             println("Target folder: ${options.target}")
             println("Move: ${options.move}")

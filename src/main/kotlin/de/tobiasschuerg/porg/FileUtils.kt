@@ -3,6 +3,7 @@ package de.tobiasschuerg.porg
 import com.drew.imaging.ImageMetadataReader
 import com.drew.imaging.ImageProcessingException
 import com.drew.imaging.quicktime.QuickTimeMetadataReader
+import com.drew.metadata.Metadata
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.drew.metadata.mov.media.QuickTimeVideoDirectory
 import com.drew.metadata.mp4.Mp4Directory
@@ -35,7 +36,7 @@ fun File.getDate(): LocalDate? {
             this.delete()
             null
         }
-        "jpg" -> {
+        "jpg", "jpeg" -> {
             val metaData = ImageMetadataReader.readMetadata(this)
             val exifDir = metaData.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
             if (exifDir != null) {
@@ -53,8 +54,9 @@ fun File.getDate(): LocalDate? {
         }
         "mp4" -> {
             try {
-                val metaData = ImageMetadataReader.readMetadata(this)
-                getMp4Date(metaData.getFirstDirectoryOfType(Mp4Directory::class.java))
+                val metaData: Metadata = ImageMetadataReader.readMetadata(this)
+                val mp4: Mp4Directory? = metaData.getFirstDirectoryOfType(Mp4Directory::class.java)
+                mp4?.let { getMp4Date(it) }
             } catch (e: ImageProcessingException) {
                 println("Error processing ${this.name}")
                 e.printStackTrace()
