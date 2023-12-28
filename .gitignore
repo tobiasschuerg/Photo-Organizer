@@ -138,3 +138,5 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+.idea/workspace.xml
+__pycache__/date_extraction.cpython-311.pyc

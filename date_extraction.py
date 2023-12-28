@@ -1,6 +1,7 @@
 # date_extractions.py
 import os
 import re
+import time
 
 from PIL import Image
 from hachoir.metadata import extractMetadata
@@ -80,7 +81,8 @@ def get_date_from_filename(file_path):
 
 def get_date_taken(file_path):
     """
-    Get the date the file was taken. If the metadata is not available, try to extract the date from the filename.
+    Get the date the file was taken. If the metadata is not available,
+    try to extract the date from the filename, and then the file creation date.
 
     Args:
         file_path: The path of the file.
@@ -102,7 +104,13 @@ def get_date_taken(file_path):
         date_taken = get_date_from_filename(file_path)
 
     if date_taken is None:
-        print(f"Could not extract date from file {file_path}")
-        return None
+        # Fallback to file creation date
+        try:
+            creation_time = os.path.getctime(file_path)
+            date_taken = time.strftime('%Y-%m-%d', time.gmtime(creation_time))
+        except Exception as e:
+            print(f"Could not extract file creation date for file {file_path}: {e}")
+            return None
 
     return date_taken
+
