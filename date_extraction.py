@@ -2,15 +2,19 @@
 import os
 import re
 import time
+from datetime import datetime
 
+import pillow_heif
 from PIL import Image
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
 
+pillow_heif.register_heif_opener()  # Register HEIF/HEIC opener with Pillow
+
 
 def get_date_from_image_exif(file_path):
     """
-    Extract the date from the EXIF data of an image.
+    Extract the date from the EXIF data of an image (including HEIC).
 
     Args:
         file_path: The path of the image file.
@@ -23,7 +27,7 @@ def get_date_from_image_exif(file_path):
             if hasattr(img, '_getexif'):
                 exif_data = img._getexif()
                 if exif_data is not None and 36867 in exif_data:
-                    return exif_data[36867].replace(':', '-')
+                    return exif_data[36867].replace(':', '-').split()[0]  # Extract only the date part
     except Exception as e:
         print(f"An error occurred while trying to get the date from the EXIF data for file {file_path}: {e}")
     return None
@@ -79,38 +83,55 @@ def get_date_from_filename(file_path):
     return None
 
 
+def parse_date(date_str):
+    """
+    Parse a date string and return a datetime object if valid and after 1970, otherwise None.
+
+    Args:
+        date_str: The date string in the format YYYY-MM-DD.
+
+    Returns:
+        A datetime object or None.
+    """
+    try:
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        if date_obj.year > 1970:
+            return date_obj
+    except ValueError:
+        pass
+    return None
+
+
 def get_date_taken(file_path):
     """
-    Get the date the file was taken. If the metadata is not available,
+    Get the date the file was taken as a datetime object. If the metadata is not available,
     try to extract the date from the filename, and then the file creation date.
+    If the date is on or before 1970, it is ignored.
 
     Args:
         file_path: The path of the file.
 
     Returns:
-        The date the file was taken in the format YYYY-MM-DD if it can be found, otherwise None.
+        A datetime object representing the date the file was taken, if it can be found, otherwise None.
     """
     filename, file_extension = os.path.splitext(file_path)
 
-    if file_extension.lower() in ['.jpg', '.jpeg', '.png', '.gif', '.tiff']:
-        date_taken = get_date_from_image_exif(file_path)
+    # Check file extension and extract date string
+    if file_extension.lower() in ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.heic']:
+        date_str = get_date_from_image_exif(file_path)
     elif file_extension.lower() in ['.mp', '.mp4', '.mov', '.avi', '.mkv']:
-        date_taken = get_date_from_movie_metadata(file_path)
+        date_str = get_date_from_movie_metadata(file_path)
     else:
         print(f"Unsupported file extension {file_extension} for file {file_path}")
         return None
 
-    if date_taken is None:
-        date_taken = get_date_from_filename(file_path)
+    if not date_str:
+        date_str = (get_date_from_filename(file_path)
+                    or time.strftime('%Y-%m-%d', time.gmtime(os.path.getctime(file_path))))
 
-    if date_taken is None:
-        # Fallback to file creation date
-        try:
-            creation_time = os.path.getctime(file_path)
-            date_taken = time.strftime('%Y-%m-%d', time.gmtime(creation_time))
-        except Exception as e:
-            print(f"Could not extract file creation date for file {file_path}: {e}")
-            return None
+    date_obj = parse_date(date_str) if date_str else None
 
-    return date_taken
-
+    if not date_obj:
+        return None
+    else:
+        return date_obj

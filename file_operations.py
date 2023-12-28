@@ -23,12 +23,10 @@ def get_destination_directory(output_directory, date_taken):
     """
     Get the destination directory based on the date taken.
     """
-    year, month, day = date_taken[:4], date_taken[5:7], date_taken[
-                                                        8:10]  # Extract year, month, and day from the EXIF data or filename
 
     # Check if a directory starting with the correct date string already exists
-    year_directory = os.path.join(output_directory, year)
-    date_string = f"{year}-{month}-{day}"
+    year_directory = os.path.join(output_directory, str(date_taken.year))
+    date_string = f"{date_taken.year}-{date_taken.month}-{date_taken.day}"
     destination_directory = None
     if os.path.exists(year_directory):
         for dir_name in os.listdir(year_directory):
@@ -65,16 +63,15 @@ def organize_files(input_directory, output_directory, operation):
     processed_files_count = 0
     error_files_count = 0
 
-    for filename in os.listdir(input_directory):
-        if filename.lower().endswith(
-                (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".mp", ".mp4", ".mov", ".avi", ".mkv", ".flv", ".wmv")):
+    for item in os.listdir(input_directory):
+        file_path = os.path.join(input_directory, item)
+        if os.path.isfile(file_path):  # Check if it's a file
             file_count += 1
-            file_path = os.path.join(input_directory, filename)
             date_taken = get_date_taken(file_path)
 
             if date_taken:
                 destination_directory = get_destination_directory(output_directory, date_taken)
-                new_file_path = os.path.join(destination_directory, filename)
+                new_file_path = os.path.join(destination_directory, item)
 
                 try:
                     if operation.lower() == 'move':
@@ -88,7 +85,7 @@ def organize_files(input_directory, output_directory, operation):
             else:
                 print(f"Could not determine date taken for file {file_path}. Skipping.")
                 error_files_count += 1
-
-            print(f"Processed {processed_files_count} out of {file_count} files. {error_files_count} errors occurred.")
+        else:
+            print(f"Skipping directory: {file_path}")
 
     print(f"Finished processing. {processed_files_count} files processed, {error_files_count} errors.")
