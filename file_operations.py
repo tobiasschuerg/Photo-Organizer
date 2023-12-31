@@ -19,26 +19,38 @@ def move_file(source_path, destination_path):
     shutil.move(source_path, destination_path)
 
 
+import os
+
 def get_destination_directory(output_directory, date_taken):
     """
     Get the destination directory based on the date taken.
+
+    Args:
+        output_directory: The base output directory.
+        date_taken: A datetime object representing the date the file was taken.
+
+    Returns:
+        The path of the destination directory.
     """
 
-    # Check if a directory starting with the correct date string already exists
-    year_directory = os.path.join(output_directory, str(date_taken.year))
-    date_string = f"{date_taken.year}-{date_taken.month}-{date_taken.day}"
-    destination_directory = None
-    if os.path.exists(year_directory):
-        for dir_name in os.listdir(year_directory):
-            if dir_name.startswith(date_string):
-                destination_directory = os.path.join(year_directory, dir_name)
-                break
+    if date_taken is None:
+        print("Date taken is None, cannot determine destination directory.")
+        return None
 
-    if not destination_directory:
-        destination_directory = os.path.join(year_directory, date_string)
+    # Format the date into year, month, and day with leading zeros for month and day
+    year = date_taken.strftime('%Y')
+    month = date_taken.strftime('%m')
+    day = date_taken.strftime('%d')
+    sub_dir_name = f"{year}-{month}-{day}"
+
+    year_directory = os.path.join(output_directory, year)
+    destination_directory = os.path.join(year_directory, sub_dir_name)
+
+    if not os.path.exists(destination_directory):
         os.makedirs(destination_directory, exist_ok=True)  # Create new directory if it doesn't exist
 
     return destination_directory
+
 
 
 def organize_files(input_directory, output_directory, operation):
